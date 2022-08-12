@@ -3,6 +3,8 @@ import sys
 import ctypes
 
 from pygame.locals import *
+from Component import ResistorStandard
+from Editor import Editor
 
 
 def maximise():
@@ -20,16 +22,26 @@ def main():
     scr_h = screen.get_height()
     font = pygame.font.SysFont('lucidaconsole', 60)
     font2 = pygame.font.SysFont('lucidaconsole', 20)
+    components = []
+    components.append(ResistorStandard(00, 00, screen))
+    components.append(ResistorStandard(100,100,screen))
+
+    editor = Editor(screen, components)
+
 
     while 1:
         clock.tick(60)
-        screen.fill((255, 255, 255))
-        screen.blit(font.render('yay', False, (0, 0, 0)), (20, 20))
-
+        screen.fill((220, 220, 220))
+        #screen.blit(font.render('yay', False, (0, 0, 0)), (20, 20))
+        for component in components:
+            component.draw()
+            component.select()
+        editor.run()
         for event in pygame.event.get():
             if event.type == QUIT:
                 sys.exit(0)
         pygame.display.update()
+
 
 if __name__ == '__main__':
     main()
