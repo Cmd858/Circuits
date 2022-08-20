@@ -5,10 +5,31 @@ import ctypes
 from pygame.locals import *
 from Component import ResistorStandard
 from Editor import Editor
+from Container import Container
 
 
 def maximise():
     ctypes.windll.user32.ShowWindow(pygame.display.get_wm_info()['window'], 3)
+
+
+def do_events(components):
+    for event in pygame.event.get():
+        if event.type == QUIT:
+            sys.exit(0)
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            print('mdown')
+            mpos = pygame.mouse.get_pos()
+            for component in components:
+                if component.touched(mpos):
+                    print('omg')
+                    component.drag_set()
+                    break
+        if event.type == pygame.MOUSEBUTTONUP:
+            mpos = pygame.mouse.get_pos()
+            for component in components:
+                if component.touched(mpos):
+                    component.dragging = False
+                    break
 
 
 def main():
@@ -22,24 +43,18 @@ def main():
     scr_h = screen.get_height()
     font = pygame.font.SysFont('lucidaconsole', 60)
     font2 = pygame.font.SysFont('lucidaconsole', 20)
-    components = []
-    components.append(ResistorStandard(00, 00, screen))
-    components.append(ResistorStandard(100,100,screen))
 
-    editor = Editor(screen, components)
+    container = Container([ResistorStandard(00, 00, screen), ResistorStandard(100,100,screen)])
+    editor = Editor(screen, container.components)
 
 
     while 1:
         clock.tick(60)
         screen.fill((220, 220, 220))
         #screen.blit(font.render('yay', False, (0, 0, 0)), (20, 20))
-        for component in components:
-            component.draw()
-            component.select()
+        container.tick()
         editor.run()
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                sys.exit(0)
+        do_events(container.components)
         pygame.display.update()
 
 

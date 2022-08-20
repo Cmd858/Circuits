@@ -30,20 +30,23 @@ class ResistorStandard(BaseComponent):
 
         # make image cropper for lazy auto-crop via lines of alpha values
 
-    def select(self):
-        if not self.dragging:
-            if pygame.mouse.get_pressed()[0] and self.rect.collidepoint(*pygame.mouse.get_pos()):
-                self.dragging = True
-                pos = pygame.mouse.get_pos()
-                self.offset = [pos[0] - self.x, pos[1] - self.y]
-        else:
-            if pygame.mouse.get_pressed()[0]:
-                pos = pygame.mouse.get_pos()
-                self.x = pos[0] - self.offset[0]
-                self.y = pos[1] - self.offset[1]  # maybe constant update for bb idk
-            else:
-                self.dragging = False
-                self._bb()
+    # refactor to make it only trigger on events instead of all the time
+    def drag(self):
+        if self.dragging:
+            pos = pygame.mouse.get_pos()
+            self.x = pos[0] - self.offset[0]
+            self.y = pos[1] - self.offset[1]  # maybe constant update for bb idk
+
+    def drag_set(self):
+        self.dragging = True
+        pos = pygame.mouse.get_pos()
+        self.offset = [pos[0] - self.x, pos[1] - self.y]
+
+    def drag_release(self):
+        pass
+
+    def touched(self, mpos):
+        return self.rect.collidepoint(mpos)
 
     def _bb(self):
         """Re-grab bounding box"""
