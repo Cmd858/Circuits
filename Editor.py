@@ -11,6 +11,7 @@ class Editor:
         self.selected_area = pygame.Rect(0, 0, 0, 0)
 
     # possible use for generator to yield data idk
+    
     def get_selected(self):
         if not self.selecting:
             pos = pygame.mouse.get_pos()
@@ -22,11 +23,22 @@ class Editor:
                 self.selecting = False
                 self._check_select_collision()
 
+        ###
+        if self.selecting:
+            pass
+
+    def select_down(self, mpos):
+        self.selecting = True
+        self.select_pos = mpos
+
+    def select_up(self):
+        self._check_select_collision()
+        self.selecting = False
+
     def draw_select(self):
         if self.selecting:
-            # print(*(i-j for i, j in zip(self.select_pos, pygame.mouse.get_pos())))
-            self.selected_area.update((*self.select_pos,  # below does subtraction from pos
-                              *(j-i for i, j in zip(self.select_pos, pygame.mouse.get_pos()))))
+            self.selected_area.update(*(*self.select_pos,  # below does subtraction from pos
+                                        *(j - i for i, j in zip(self.select_pos, pygame.mouse.get_pos()))))
             self.selected_area.normalize()
             pygame.draw.rect(self.screen,
                              (100, 100, 100),
@@ -34,7 +46,7 @@ class Editor:
                              1)
 
     def run(self):
-        self.get_selected()
+        #self.get_selected()
         self.draw_select()
 
     def _check_select_collision(self):
