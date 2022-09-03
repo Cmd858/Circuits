@@ -24,11 +24,15 @@ class Container:
         for component in self.components:
             component.selected = False
 
+    """Puts all sprite images into dict and scales them to hardcoded factor"""
     @staticmethod
     def get_sprites():  # using underscores in names to separate name from frame
         sprites = {}
+
         for path in os.listdir('Images/'):  # have fun refactoring this for proper logic
             if path.endswith('.png'):  # will not work with more than one frame lmao
                 sprites[path[:path.rindex('.')]] = pygame.image.load(f'Images/{path}').convert_alpha()
+        for key, sprite in sprites.items():
+            sprites[key] = pygame.transform.scale(sprite, [i * 4 for i in sprite.get_size()])
         return sprites
 

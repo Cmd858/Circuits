@@ -59,7 +59,10 @@ class ResistorStandard(BaseComponent):
         super().__init__(x, y, screen, sprites, self.sprite_name)
         # refactor to make container reference, let container handle sprites
         self.image = self.sprites[0]  # only has one image
-        self.image = pygame.transform.scale(self.image, (68, 20))
+        #self.image = pygame.transform.scale(self.image, (68, 20))
+        # self.image = pygame.transform.scale(self.image, [i * 4 for i in self.image.get_size()])
+        # scale factr 4
+
         self.rect = self._bb()
 
 

@@ -59,7 +59,7 @@ def main():
     sprites = Container.get_sprites()
     container = Container([ResistorStandard(00, 00, screen, sprites), ResistorStandard(100, 100, screen, sprites)])
     editor = Editor(screen, container.components)
-    comp_store = ComponentStore(screen, (scr_w, scr_h), scr_w/5)
+    comp_store = ComponentStore(screen, (scr_w, scr_h), scr_w/5, sprites)
     # container.components[0].load_sprites(container.sprites)
 
 
