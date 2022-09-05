@@ -14,10 +14,12 @@ class ComponentStore:
         print(self.sprites)
 
     def draw(self):
-        for i, (name, sprite) in enumerate(self.sprites.items()):
-            self.screen.blit(sprite, (200, 150 + i*40))
-            self.screen.blit(self.font2.render(name, False, (0, 0, 0)), (200 + 100, 150 + i*40))
         pygame.draw.rect(self.screen, self.bg_colour, self.rect)
+        for i, (name, sprite) in enumerate(self.sprites.items()):
+            self.screen.blit(sprite, (self.rect.x, 150 + i*50))
+            # print all names and cut off trailing "_0"
+            self.screen.blit(self.font2.render(name[:-2], False, (0, 0, 0)),
+                             (self.rect.x + sprite.get_width() + 10, 150 + i*50))
 
     """Get first frame of all main components, as well as their target names"""
     def get_valid_components(self):
@@ -26,7 +28,7 @@ class ComponentStore:
     """Check each component for selection"""
     def collide(self):
         pass
-
+        # TODO: make collision and scrolling capabilities
 
 
 class SearchBar:
