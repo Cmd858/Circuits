@@ -23,10 +23,10 @@ def do_events(container):
                 mpos = pygame.mouse.get_pos()
                 if container.editor.in_bounds(mpos):
                     for component in container.components:
-                        if (wire_box := component.touched_wires(mpos)) is not None:
-                            print(wire_box)
+                        if (wire_box_index := component.touched_wires(mpos)) is not None:
+                            print(wire_box_index)
                             container.editor.set_wire_draw(mpos)
-                            container.add_wire(component, wire_box, True)
+                            container.add_wire(component, wire_box_index, True)
                             break
                         elif component.touched(mpos):
                             if not component.selected and not pygame.key.get_pressed()[pygame.K_LCTRL]:
@@ -48,8 +48,8 @@ def do_events(container):
             if event.button == 1:  # left button up
                 if container.editor.in_bounds(mpos):
                     for component in container.components:
-                        if (wire_box := component.touched_wires(mpos)) is not None:
-                            container.add_wire(component, wire_box, False)
+                        if (wire_box_index := component.touched_wires(mpos)) is not None:
+                            container.add_wire(component, wire_box_index, False)
                             break
                     for component in container.components:
                         component.drag_release()
@@ -62,6 +62,12 @@ def do_events(container):
                 container.delete_selected()
             elif event.key == pygame.K_k:
                 container.build_paths()
+            """
+            elif event.key == pygame.K_l:
+                container.load()
+            elif event.key == pygame.K_s:
+                container.save()
+            """
 
 
 def main():
@@ -82,7 +88,6 @@ def main():
                           [ResistorStandard(00, 00, screen, sprites),
                            ResistorStandard(100, 100, screen, sprites),
                            ResistorStandard(00, 00, screen, sprites),
-                           Cell(00, 00, screen, sprites),
                            Cell(00, 00, screen, sprites)])
     # editor = Editor(screen, container.components, (scr_w/5*4, scr_h))
     # comp_store = ComponentStore(screen, (scr_w, scr_h), scr_w/5, sprites)
@@ -113,3 +118,5 @@ if __name__ == '__main__':
 # TODO 4: scrolling around
 
 # finish trees and do wire boxes with images
+
+# maybe tally up resistances, calc current and distribute voltage IDK

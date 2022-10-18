@@ -1,9 +1,11 @@
 import pygame.draw
+import pickle
 
 from Component import *
 from Editor import Editor
 from ComponentStore import ComponentStore
-from Wirepath import Wirepath, Node
+# from Wirepath import Wirepath, Node
+from WireMatrix import WireMatrix
 
 import os
 
@@ -11,6 +13,11 @@ import os
 class Container:
     def __init__(self, screen, components: [BaseComponent] = None):
         self.components = components if components is not None else []
+        self.wire_matrix = WireMatrix(len(self.components))
+        for i, component in enumerate(self.components):
+            self.components[i].cid = i
+            self.wire_matrix.add_node(component)
+        self.cids = [component.cid for component in self.components]
         self.dragging = False
         self.offx = 0
         self.offy = 0
@@ -19,6 +26,7 @@ class Container:
         self.start_wire = None
         self.wires = []  # ((component1, box_index1), (component2, box_index2)), box_index is of wire_box list
         self.wire_paths = []
+
         self.screen = screen
         scr_w, scr_h = screen.get_size()
 
@@ -46,13 +54,14 @@ class Container:
             self.start_wire = (component, box_index)
         else:
             self.wires.append(((component, box_index), self.start_wire))
+            self.wire_matrix.connect_nodes((component.cid, box_index), (self.start_wire[0].cid, self.start_wire[1]))
 
     def draw_wires(self):
         for wire in self.wires:
             # lol no screen
             pygame.draw.line(self.screen, (0, 0, 0),
-                             wire[0][0].box_pos(wire[0][1]),
-                             wire[1][0].box_pos(wire[1][1]))
+                             wire[0][0].box_pos(wire[0][0].wire_boxes[wire[0][1]]),
+                             wire[1][0].box_pos(wire[1][0].wire_boxes[wire[1][1]]))
 
     def delete_selected(self):
         i = 0
@@ -70,30 +79,56 @@ class Container:
 
     def append_component(self, mpos):
         """Major bugs here lol"""
-        self.components.append(self.comp_store.grab_component(mpos)(mpos[0],
-                                                                    mpos[1],
-                                                                    self.screen,
-                                                                    self.sprites
-                                                                    ))
-        self.components[-1].selected = True
-        self.components[-1].dragging = True
+        self.components.append(component := self.comp_store.grab_component(mpos)(mpos[0],
+                                                                                 mpos[1],
+                                                                                 self.screen,
+                                                                                 self.sprites
+                                                                                 ))
+        component.selected = True
+        component.dragging = True
+        component.cid = self._get_id(component)
+
 
     def build_paths(self):
         """Paths are a special property of the Cell component"""
+        '''
         self.wire_paths = []
         for component in self.components:
             if component.sprite_name == 'Cell':
                 print('OMG CELL')
                 self.wire_paths.append(Wirepath(self.wires, component))
+        '''
+        print(self.wire_matrix)
+
+    def _get_id(self, component):
+        for i, cid in enumerate(self.cids):
+            if i != cid:
+                self.cids.insert(i, i)
+                return i
+        self.cids.append(len(self.cids))
+        self.wire_matrix.add_node(component)
+        return len(self.cids) - 1  # -1 bc of append
+
+    def save(self):
+        name = 'save1'
+        with open(name, 'wb') as f:
+            pickle.dump(self, f)
+
+    def load(self):
+        name = 'save1'
+        with open(name, 'rb') as f:
+            self.__dict__.clear()
+            self.__dict__.update(pickle.load(f).__dict__)
 
     """Puts all sprite images into dict and scales them to hardcoded factor"""
+
     @staticmethod
     def get_sprites():  # using underscores in names to separate name from frame
         sprites = {}
-
+        scale = 4
         for path in os.listdir('Images/'):  # have fun refactoring this for proper logic
             if path.endswith('.png'):  # will not work with more than one frame lmao
                 sprites[path[:path.rindex('.')]] = pygame.image.load(f'Images/{path}').convert_alpha()
         for key, sprite in sprites.items():
-            sprites[key] = pygame.transform.scale(sprite, [i * 4 for i in sprite.get_size()])
+            sprites[key] = pygame.transform.scale(sprite, [i * scale for i in sprite.get_size()])
         return sprites

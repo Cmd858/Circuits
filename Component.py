@@ -16,6 +16,10 @@ class BaseComponent:
         self.sprites = self.load_sprites(sprites, target)
         # wire boxes stored as top left relative to sprite
         self.wire_boxes = []
+        self.cid = None
+        self.font = pygame.font.SysFont('lucidaconsole', 30)
+
+        self.resistance = 10
 
     def draw(self):
         self.screen.blit(self.image, (self.x, self.y))
@@ -24,13 +28,15 @@ class BaseComponent:
         else:
             pygame.draw.rect(self.screen, (0, 255, 0), self.rect, 1)
         for wire_box in self.wire_boxes:
-            pygame.draw.rect(self.screen, (200, 200, 0), (self.x+wire_box[0], self.y+wire_box[1], 10, 10), 1)
+            pygame.draw.rect(self.screen, (200, 200, 0), (self.x + wire_box[0], self.y + wire_box[1], 10, 10), 1)
+        self.screen.blit(self.font.render(f'{self.resistance}', False, (0, 0, 0)), (self.x, self.y))
 
     def load_sprites(self, sprites: dict, target: str):  # will probs mis-order if more than 10 unless hex
         self.sprites = [sprites[i] for i in sprites if i.startswith(target)]  # don't ask lol it works
         return self.sprites
 
         # refactor to make it only trigger on events instead of all the time
+
     def drag(self):
         if self.dragging:
             pos = pygame.mouse.get_pos()
@@ -52,10 +58,10 @@ class BaseComponent:
         return self.rect.collidepoint(mpos)
 
     def touched_wires(self, mpos):
-        for wire_box in self.wire_boxes:
+        for i, wire_box in enumerate(self.wire_boxes):
             if self.x + wire_box[0] < mpos[0] < self.x + wire_box[0] + 10 \
                     and self.y + wire_box[1] < mpos[1] < self.y + wire_box[1] + 10:
-                return wire_box
+                return i  # index of wire box
         return None
 
     def box_pos(self, box_pos):
@@ -84,6 +90,7 @@ class ResistorStandard(BaseComponent):
 
         self.rect = self.get_bb()
         self.wire_boxes = [(-5, 5), (64, 5)]
+
 
 class Cell(BaseComponent):
     def __init__(self, x, y, screen: pygame.display, sprites: dict):
@@ -138,6 +145,7 @@ class ResistorThermal(BaseComponent):
         self.rect = self.get_bb()
         self.wire_boxes = [(-5, 5), (64, 5)]
 
+
 class ResistorVariable(BaseComponent):
     def __init__(self, x, y, screen: pygame.display, sprites: dict):
         self.sprite_name = 'ResistorVariable'
@@ -146,6 +154,7 @@ class ResistorVariable(BaseComponent):
         self.rect = self.get_bb()
         self.wire_boxes = [(-5, 5), (64, 5)]
 
+
 class SwitchSPST(BaseComponent):
     def __init__(self, x, y, screen: pygame.display, sprites: dict):
         self.sprite_name = 'SwitchSPST'
@@ -153,4 +162,3 @@ class SwitchSPST(BaseComponent):
         self.image = self.sprites[0]
         self.rect = self.get_bb()
         self.wire_boxes = [(-5, 5), (64, 5)]
-

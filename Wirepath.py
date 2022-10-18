@@ -58,8 +58,8 @@ class Node:
                     rep_str += '|%\n'
         return rep_str[:-1]
 
-    def append_node(self, name='X'):
-        self.children.append(Node(name))
+    def append_node(self, component, name='X'):
+        self.children.append(Node(component, name))
 
     def build_path(self):
         for wire in self.component.wires:
@@ -86,3 +86,6 @@ if __name__ == '__main__':
     path.children[3].children[0].append_node()
     print(path)
     print(path.children[1])
+
+# TODO: consider using connectivity matrix if it might be more reliable
+# ^ would use 0, 1, 2 to repr i/o or both, + maybe weights in the tuple for resistances idk
