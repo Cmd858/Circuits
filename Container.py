@@ -50,11 +50,12 @@ class Container:
             component.selected = False
 
     def add_wire(self, component, box_index, first=True):
+        """Adds a wire to the matrix"""
         if first:
-            self.start_wire = (component, box_index)
+            self.start_wire = self.wire_matrix.get_nid(component.cid, box_index)
         else:
             self.wires.append(((component, box_index), self.start_wire))
-            self.wire_matrix.connect_nodes((component.cid, box_index), (self.start_wire[0].cid, self.start_wire[1]))
+            self.wire_matrix.connect_nodes(1, 1)
 
     def draw_wires(self):
         for wire in self.wires:
@@ -88,19 +89,8 @@ class Container:
         component.dragging = True
         component.cid = self._get_id(component)
 
-
-    def build_paths(self):
-        """Paths are a special property of the Cell component"""
-        '''
-        self.wire_paths = []
-        for component in self.components:
-            if component.sprite_name == 'Cell':
-                print('OMG CELL')
-                self.wire_paths.append(Wirepath(self.wires, component))
-        '''
-        print(self.wire_matrix)
-
     def _get_id(self, component):
+        """Get the ID of a new component, only create a new one if there is space"""
         for i, cid in enumerate(self.cids):
             if i != cid:
                 self.cids.insert(i, i)
@@ -110,17 +100,18 @@ class Container:
         return len(self.cids) - 1  # -1 bc of append
 
     def save(self):
+        """Currently unused save function"""
         name = 'save1'
         with open(name, 'wb') as f:
             pickle.dump(self, f)
 
     def load(self):
+        """Currently unused load function"""
         name = 'save1'
         with open(name, 'rb') as f:
             self.__dict__.clear()
             self.__dict__.update(pickle.load(f).__dict__)
 
-    """Puts all sprite images into dict and scales them to hardcoded factor"""
 
     @staticmethod
     def get_sprites():  # using underscores in names to separate name from frame

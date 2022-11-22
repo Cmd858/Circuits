@@ -1,12 +1,8 @@
-import pygame
 import sys
 import ctypes
 
 from pygame.locals import *
-import pygame
 from Component import *
-from ComponentStore import ComponentStore
-from Editor import Editor
 from Container import Container
 
 
@@ -61,7 +57,9 @@ def do_events(container):
             if event.key == pygame.K_DELETE or event.key == pygame.K_PERIOD:
                 container.delete_selected()
             elif event.key == pygame.K_k:
-                container.build_paths()
+                # container.build_paths()
+                m = container.wire_matrix.copy_matrix()
+                container.wire_matrix.reduce_matrix(m)
             """
             elif event.key == pygame.K_l:
                 container.load()
