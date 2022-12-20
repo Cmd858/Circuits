@@ -59,7 +59,7 @@ def do_events(container):
             elif event.key == pygame.K_k:
                 # container.build_paths()
                 m = container.wire_matrix.copy_matrix()
-                container.wire_matrix.reduce_matrix(m)
+                print(container.wire_matrix.reduce_matrix(m))
             """
             elif event.key == pygame.K_l:
                 container.load()

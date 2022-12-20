@@ -12,10 +12,11 @@ import os
 
 class Container:
     def __init__(self, screen, components: [BaseComponent] = None):
-        self.components = components if components is not None else []
+        self.components: [BaseComponent] = components if components is not None else []
         self.wire_matrix = WireMatrix(len(self.components))
         for i, component in enumerate(self.components):
-            self.components[i].cid = i
+            component.cid = i
+            print(f'component, i: {component, i}')
             self.wire_matrix.add_node(component)
         self.cids = [component.cid for component in self.components]
         self.dragging = False
@@ -38,7 +39,7 @@ class Container:
             component.draw()
             # component.select()
             component.drag()
-            self.draw_wires()
+        self.draw_wires()
 
     def drag_set(self):
         for component in self.components:
@@ -49,45 +50,61 @@ class Container:
         for component in self.components:
             component.selected = False
 
-    def add_wire(self, component, box_index, first=True):
+    def add_wire(self, component, box_index: int, first=True):
         """Adds a wire to the matrix"""
         if first:
             self.start_wire = self.wire_matrix.get_nid(component.cid, box_index)
-        else:
-            self.wires.append(((component, box_index), self.start_wire))
-            self.wire_matrix.connect_nodes(1, 1)
+        elif self.start_wire != (wire2 := self.wire_matrix.get_nid(component.cid, box_index)):
+            if wire2 != None and self.start_wire != None:
+                self.wires.append((wire2, self.start_wire))
+                self.wire_matrix.connect_nodes(*self.wires[-1])
 
     def draw_wires(self):
+        """Draw all wires"""
         for wire in self.wires:
             # lol no screen
+            #print(self.wires)
+            #print(self.wire_matrix.nodes)
+            #print(self.wire_matrix.get_wirebox_pos_from_nid(wire[0]),
+            #      self.wire_matrix.get_wirebox_pos_from_nid(wire[1]))
             pygame.draw.line(self.screen, (0, 0, 0),
-                             wire[0][0].box_pos(wire[0][0].wire_boxes[wire[0][1]]),
-                             wire[1][0].box_pos(wire[1][0].wire_boxes[wire[1][1]]))
+                             self.wire_matrix.get_wirebox_pos_from_nid(wire[0]),
+                             self.wire_matrix.get_wirebox_pos_from_nid(wire[1]))
 
     def delete_selected(self):
+        """Remove a component and wires connecting to it"""
         i = 0
+        print(f'Wires: {self.wires}')
         while i < len(self.components):
             if self.components[i].selected:
                 j = 0
                 while j < len(self.wires):
-                    if self.components[i] in self.wires[j][0] or self.components[i] in self.wires[j][1]:
-                        self.wires.pop(j)
-                        j -= 1
+                    print(self.wires, self.components, i, j)
+                    nids = self.wire_matrix.get_nids(self.components[i].cid)
+                    print(nids)
+                    for wire in self.wires[j]:
+                        if wire in nids:
+                            self.wires.pop(j)
+                            j -= 1
+                            break
                     j += 1
                 self.components.pop(i)
                 i -= 1
             i += 1
+        print(f'Wires: {self.wires}')
 
     def append_component(self, mpos):
-        """Major bugs here lol"""
-        self.components.append(component := self.comp_store.grab_component(mpos)(mpos[0],
-                                                                                 mpos[1],
-                                                                                 self.screen,
-                                                                                 self.sprites
-                                                                                 ))
-        component.selected = True
-        component.dragging = True
-        component.cid = self._get_id(component)
+        """Adds a component to the list and matrix, if a valid component was selected"""
+        component = self.comp_store.grab_component(mpos)  # returns class object to be initialised
+        if component is not None:
+            self.components.append(component(mpos[0],
+                                             mpos[1],
+                                             self.screen,
+                                             self.sprites
+                                             ))
+            self.components[-1].selected = True
+            self.components[-1].dragging = True
+            self.components[-1].cid = self._get_id(self.components[-1])
 
     def _get_id(self, component):
         """Get the ID of a new component, only create a new one if there is space"""
@@ -112,9 +129,9 @@ class Container:
             self.__dict__.clear()
             self.__dict__.update(pickle.load(f).__dict__)
 
-
     @staticmethod
     def get_sprites():  # using underscores in names to separate name from frame
+        """Load sprites into a dictionary and return it"""
         sprites = {}
         scale = 4
         for path in os.listdir('Images/'):  # have fun refactoring this for proper logic

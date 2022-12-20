@@ -1,16 +1,13 @@
 import Component
 
 
-# TODO: rewrite matrix logic
-
-
 class WireMatrix:
     """
     column shows what it is attached to, row shows what is attached to it (the inverse) ie 4 -> 2(0), 2 -> 4(1)
     wire-boxes are nodes, wires are arcs therefore components are positive weight arcs
     """
 
-    def __init__(self, size):
+    def __init__(self, size=0):
         self.matrix: list[list[float]] = [[-1 for _ in range(size)] for _ in range(size)]
         self.nodes: [Node] = []
         # create id list for reuse after deletion
@@ -23,22 +20,47 @@ class WireMatrix:
 
     def get_free_nodes(self, n: int):
         """Get the free nodes and return the number that need to be pushed back"""
-        l = []
+        # TODO: this is completely whack bc its uses nodes not nids
+        nids = []
+        l = []  # free nodes
         for i, node in enumerate(self.nodes):
-            if node is None:
+            nids.extend(node.nids)
+        for i in range(len(nids)):
+            if i not in nids:
                 l.append(i)
+            if len(l) >= n:
+                break
         return l, n-len(l)
 
     def add_node(self, component: Component.BaseComponent, name: str = 'X'):
         """Create a node and extend the matrix accordingly, creating nids as required by the component"""
         print(self.nodes)
+        print(component)
         # modify to do nodes
         nids, pushbacknum = self.get_free_nodes(len(component.wire_boxes))
+        print(f'nids: {nids}, push: {pushbacknum}')
         nids.extend(self._extent_matrix(pushbacknum))
+        print(f'add_nids: {nids}')
         self.nodes.append(Node(component, name, len(self.nodes), nids))
 
-    def connect_nodes(self, nid1: int, nid2: int, resistance: float = 0):
+    def get_node_from_id(self, nid):
+        """Checks if a nid is in the node list, an return it if it is"""
+        for node in self.nodes:
+            if nid in node.nids:
+                return node
+        return None
+
+    def get_wirebox_pos_from_nid(self, nid):
+        for node in self.nodes:
+            if nid in node.nids:
+                wbs = node.component.wire_boxes[node.nids.index(nid)]
+                return [wbs[0] + node.component.x + 5, wbs[1] + node.component.y + 5]
+        return None
+
+    def connect_nodes(self, nid1: int, nid2: int, resistance: float = 0) -> None:
         """Connect two nodes in the matrix"""
+        print(self.matrix)
+        print(nid1, nid2)
         self.matrix[nid1][nid2] = resistance
         self.matrix[nid2][nid1] = resistance
 
@@ -51,8 +73,7 @@ class WireMatrix:
         for line in self.matrix:
             line.extend([-1 for _ in range(length)])
         self.matrix.extend([[-1 for _ in range(length + len(self.matrix))] for _ in range(length)])
-        return [i for i in range(len(self.matrix), length, -1)]
-
+        return [i for i in range(len(self.matrix)-length, len(self.matrix))]
 
     def reduce_matrix(self, matrix: list[list[int]]):
         while 1:
@@ -83,16 +104,22 @@ class WireMatrix:
 
     def get_nid(self, cid, index):
         print(f'cid: {cid}, index: {index}, nodes: {self.nodes}')
-        print(self.nodes[cid].nids)
+        print(f'nids: {self.nodes[cid].nids}')
         return self.nodes[cid].nids[index]
+
+    def get_nids(self, cid):
+        return self.nodes[cid].nids
 
 
 class Node:
     def __init__(self, component: Component, name, cid, nids):
-        self.component = component
+        self.component: component = component
         self.name = name
         self.cid = cid  # component id
         self.nids = nids  # node id list
+
+    def get_wirebox_from_nid(self):
+        pass
 
 
 
