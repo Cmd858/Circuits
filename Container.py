@@ -1,5 +1,6 @@
 import pygame.draw
 import pickle
+from copy import deepcopy
 
 from Component import *
 from Editor import Editor
@@ -33,6 +34,8 @@ class Container:
 
         self.editor = Editor(screen, self.components, (scr_w / 5 * 4, scr_h))
         self.comp_store = ComponentStore(screen, (scr_w, scr_h), scr_w / 5, self.sprites)
+
+
 
     def tick(self):
         for component in self.components:
@@ -116,18 +119,40 @@ class Container:
         self.wire_matrix.add_node(component)
         return len(self.cids) - 1  # -1 bc of append
 
+    """
     def save(self):
-        """Currently unused save function"""
+        "Currently unused save function"
         name = 'save1'
+        savedict = {'Cmps': [], 'Matrix': None}
+        for cmp in self.components:
+            savedict['Cmps'].append({'Obj': cmp.__class__, 'xy': (cmp.x, cmp.y), 'cid': cmp.cid})
+        savedict['Matrix'] = self.wire_matrix
         with open(name, 'wb') as f:
-            pickle.dump(self, f)
+            pickle.dump(savedict, f)
 
     def load(self):
-        """Currently unused load function"""
+        "Currently unused load function"
         name = 'save1'
+        self.components = []
+        self.wire_matrix = None
         with open(name, 'rb') as f:
-            self.__dict__.clear()
-            self.__dict__.update(pickle.load(f).__dict__)
+            loaddict = pickle.load(f)
+        for cmp in loaddict['Cmps']:
+            self.components.append()
+    """
+    def save(self):
+        name='save1'
+
+        sprites = self.sprites
+        screen = self.screen
+        self.sprites = []
+        self.screen = None
+        self.editor = None
+        self.comp_store = None
+        with open(name, 'wb') as f:
+            pickle.dump(self, f)
+        self.sprites = sprites
+        self.screen = screen
 
     @staticmethod
     def get_sprites():  # using underscores in names to separate name from frame

@@ -1,5 +1,6 @@
 import sys
 import ctypes
+import tkinter
 
 from pygame.locals import *
 from Component import *
@@ -70,6 +71,7 @@ def do_events(container):
 
 def main():
     pygame.init()
+    window = tkinter.Tk()
     clock = pygame.time.Clock()
     pygame.display.set_caption("Circuits")
     dispinfo = pygame.display.Info()
@@ -104,16 +106,16 @@ def main():
 
         # disp fps to check performance
         # screen.blit(font2.render(str(clock.get_fps()), False, (20, 20, 20)), (100, 100))
+        #container.save()
         pygame.display.update()
 
 
 if __name__ == '__main__':
     main()
 
-# TODO 1: comp store  `
-# TODO 2: wires  `
-# TODO 3: simulation
-# TODO 4: scrolling around
+# TODO: rotation
+# TODO: point fixing for good connecting
+# TODO: straght line connectors
 
 # finish trees and do wire boxes with images
 
